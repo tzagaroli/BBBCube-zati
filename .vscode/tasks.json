@@ -1,0 +1,103 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+          "label": "build native",
+          "type": "shell",
+          "command": "./manage_cube.sh --build-release-native",
+          "args": [],
+          "problemMatcher": ["$gcc"],
+          "group": {
+              "kind": "build",
+              "isDefault": true
+          }
+      },
+      {
+        "label": "run native",
+        "type": "shell",
+        "command": "./manage_cube.sh --run-release-native",
+        "presentation": {
+          "reveal": "always"
+        }
+      },
+      {
+        "label": "build for bbb",
+        "type": "shell",
+        "command": "./manage_cube.sh --build-release-bbb",
+        "args": [],
+        "problemMatcher": ["$gcc"],
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        }
+      },
+      {
+        "label": "run on bbb",
+        "type": "shell",
+        "command": "./manage_cube.sh --run-release-bbb",
+        "presentation": {
+          "reveal": "always"
+        }
+      },
+      {
+        "label": "gui viewer",
+        "type": "shell",
+        "command": "./manage_cube.sh --gui-viewer > /dev/null 2>&1",
+        "presentation": {
+          "reveal": "never"
+        }
+      },
+      {
+        "label": "gui control",
+        "type": "shell",
+        "command": "./manage_cube.sh --gui-control > /dev/null 2>&1",
+        "presentation": {
+          "reveal": "never"
+        }
+      },
+      {
+        "label": "clean",
+        "type": "shell",
+        "command": "./manage_cube.sh --clean",
+        "args": [],
+        "problemMatcher": ["$gcc"],
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        }
+      },
+      {
+        "label": "copy ssh-key to BBB",
+        "type": "shell",
+        "command": "./manage_cube.sh --copy-sshkey",
+        "presentation": {
+          "reveal": "always"
+        }
+      },
+      {
+        "label": "start debugger native",
+        "type": "shell",
+        "command": "./manage_cube.sh --start-debugger-native",
+        "presentation": {
+          "reveal": "always"
+        }
+      },
+      {
+        "label": "start debugger bbb",
+        "type": "shell",
+        "command": "./manage_cube.sh --start-debugger-bbb",
+        "isBackground": true,
+        "problemMatcher": {
+          "pattern": {
+            "regexp": ".*"
+          },
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "Starting gdb",
+            "endsPattern": "Listening on port 2345"
+          }
+        }
+      }
+    ]
+  }
+  
