@@ -51,44 +51,33 @@ void ControlComp::run()
     // --- IMU Sensor 1 Data ---
     std::cout << "IMU Sensor 1:" << std::endl;
 
-    std::cout << "  mPhi_d (Z-Angular Velocity): "
-                << std::dec << sensor1Data.mPhi_d
-                << "  (0x" << std::setw(4) << std::setfill('0')
-                << std::hex << static_cast<UInt16>(sensor1Data.mPhi_d)
-                << ")" << std::dec << std::endl;
-
-    std::cout << "  mX_dd (X-Acceleration):      "
-                << std::dec << sensor1Data.mX_dd
-                << "  (0x" << std::setw(4) << std::setfill('0')
-                << std::hex << static_cast<UInt16>(sensor1Data.mX_dd)
-                << ")" << std::dec << std::endl;
-
-    std::cout << "  mY_dd (Y-Acceleration):      "
-                << std::dec << sensor1Data.mY_dd
-                << "  (0x" << std::setw(4) << std::setfill('0')
-                << std::hex << static_cast<UInt16>(sensor1Data.mY_dd)
-                << ")" << std::dec << std::endl;
+    ControlComp::vPrintData(sensor1Data);
 
     // --- IMU Sensor 2 Data ---
     std::cout << "IMU Sensor 2:" << std::endl;
 
-    std::cout << "  mPhi_d (Z-Angular Velocity): "
-                << std::dec << sensor2Data.mPhi_d
-                << "  (0x" << std::setw(4) << std::setfill('0')
-                << std::hex << static_cast<UInt16>(sensor2Data.mPhi_d)
-                << ")" << std::dec << std::endl;
-
-    std::cout << "  mX_dd (X-Acceleration):      "
-                << std::dec << sensor2Data.mX_dd
-                << "  (0x" << std::setw(4) << std::setfill('0')
-                << std::hex << static_cast<UInt16>(sensor2Data.mX_dd)
-                << ")" << std::dec << std::endl;
-
-    std::cout << "  mY_dd (Y-Acceleration):      "
-                << std::dec << sensor2Data.mY_dd
-                << "  (0x" << std::setw(4) << std::setfill('0')
-                << std::hex << static_cast<UInt16>(sensor2Data.mY_dd)
-                << ")" << std::dec << std::endl;
+    ControlComp::vPrintData(sensor2Data);
 
     std::cout << std::endl;
+}
+
+void ControlComp::vPrintData(CIMUData& data)
+{
+    std::cout << "  mPhi_d (Z-Angular Velocity): "
+            << std::dec << data.mPhi_d
+            << "  (0x" << std::setw(4) << std::setfill('0')
+            << std::hex << static_cast<UInt16>(data.mPhi_d)
+            << ")" << std::dec << std::endl;
+
+std::cout << "  mX_dd (X-Acceleration):      "
+            << std::dec << data.mX_dd
+            << "  (0x" << std::setw(4) << std::setfill('0')
+            << std::hex << static_cast<UInt16>(data.mX_dd)
+            << ")" << std::dec << std::endl;
+
+std::cout << "  mY_dd (Y-Acceleration):      "
+            << std::dec << data.mY_dd
+            << "  (0x" << std::setw(4) << std::setfill('0')
+            << std::hex << static_cast<UInt16>(data.mY_dd)
+            << ")" << std::dec << std::endl;
 }
