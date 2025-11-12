@@ -2,14 +2,18 @@
 #include <iostream>
 #include <iomanip>
 
+#include "CThread.h"
+
 int main_ex3()
 {
     CContainer container;
 
     ControlComp control(container);
 
-    control.init();
-    control.run();
+    CThread controlCompThread(&control, CThread::PRIORITY_ABOVE_NORM);
+
+    controlCompThread.start();
+    controlCompThread.join();
 
     return 0;
 }
@@ -51,17 +55,17 @@ void ControlComp::run()
     // --- IMU Sensor 1 Data ---
     std::cout << "IMU Sensor 1:" << std::endl;
 
-    ControlComp::vPrintData(sensor1Data);
+    ControlComp::vPrintDataIMU(sensor1Data);
 
     // --- IMU Sensor 2 Data ---
     std::cout << "IMU Sensor 2:" << std::endl;
 
-    ControlComp::vPrintData(sensor2Data);
+    ControlComp::vPrintDataIMU(sensor2Data);
 
     std::cout << std::endl;
 }
 
-void ControlComp::vPrintData(CIMUData& data)
+void ControlComp::vPrintDataIMU(CIMUData& data)
 {
     std::cout << "  mPhi_d (Z-Angular Velocity): "
             << std::dec << data.mPhi_d

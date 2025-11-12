@@ -21,7 +21,7 @@ public:
     void run() override;
 
 private:
-    void vPrintData(CIMUData& data);
+    void vPrintDataIMU(CIMUData& data);
 
     CContainer& container_;
     CBBBHardware hardware_;
