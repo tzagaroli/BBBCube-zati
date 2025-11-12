@@ -23,6 +23,8 @@ public:
 private:
     void vPrintDataIMU(CIMUData& data);
 
+    void vPrintValue(const std::string& label, UInt16 value, int indent = 0);
+
     CContainer& container_;
     CBBBHardware hardware_;
 };
