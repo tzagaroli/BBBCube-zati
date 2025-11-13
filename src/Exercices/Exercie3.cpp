@@ -48,60 +48,57 @@ void ControlComp::init()
 void ControlComp::run()
 {
     UInt16 adcValue;
-	CIMUData sensor1Data;
-	CIMUData sensor2Data;
+    CIMUData sensor1Data;
+    CIMUData sensor2Data;
+
+    auto startTime = std::chrono::steady_clock::now();
+    uint32_t n = 0;
     
     while(true)
     {
-        // Measure start time
-        auto startTime = std::chrono::steady_clock::now();
-
         if(!hardware_.fetchValues(adcValue, sensor1Data, sensor2Data))
         {
             std::cerr << "Error: fetchValues() failed!" << std::endl;
             return;
         }
 
+        container_.writeTime(n * cycleTime.count());
         container_.writeADCValue(adcValue);
         container_.writeSensor1Data(sensor1Data);
         container_.writeSensor2Data(sensor2Data);
-
         container_.signalReader();
 
-        // // Print values
-        // // --- ADC ---
-        // vPrintValue("ADC Value", adcValue);
+        // --- IMU Sensor 1 Data ---
+        std::cout << "IMU Sensor 1:" << std::endl;
+        ControlComp::vPrintDataIMU(sensor1Data);
 
-        // // --- IMU Sensor 1 Data ---
-        // std::cout << "IMU Sensor 1:" << std::endl;
+        // --- IMU Sensor 2 Data ---
+        std::cout << "IMU Sensor 2:" << std::endl;
+        ControlComp::vPrintDataIMU(sensor2Data);
+        std::cout << std::endl;
 
-        // ControlComp::vPrintDataIMU(sensor1Data);
+        // Increment counter BEFORE sleep calculation
+        n++;
+        auto currentTime = std::chrono::steady_clock::now();
 
-        // // --- IMU Sensor 2 Data ---
-        // std::cout << "IMU Sensor 2:" << std::endl;
-
-        // ControlComp::vPrintDataIMU(sensor2Data);
-
-        // std::cout << std::endl;
-
-
-        // Measure end time and calculate elapsed time
-        auto endTime = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-
+        // Calculate when the next cycle should start
+        auto nextWakeTime = startTime + (cycleTime * n);
+        
         // Calculate required sleep time
-        auto sleepTime = cycleTime - elapsedTime;
+        auto sleepTime = nextWakeTime - currentTime;
         
         // Only sleep if there's time left in the cycle
         if(sleepTime.count() > 0)
         {
-            // Convert milliseconds to microseconds for usleep
-            usleep(sleepTime.count() * 1000);
+            // Convert to microseconds for usleep
+            auto sleepMicros = std::chrono::duration_cast<std::chrono::microseconds>(sleepTime);
+            usleep(sleepMicros.count());
         }
         else
         {
             std::cerr << "Warning: Cycle time exceeded by " 
-                      << -sleepTime.count() << "ms" << std::endl;
+                      << std::chrono::duration_cast<std::chrono::milliseconds>(-sleepTime).count() 
+                      << "ms" << std::endl;
         }
     }
 }
@@ -155,16 +152,15 @@ void CCommComp::run()
 
     while(true)
     {
-        // Measure start time
         auto startTime = std::chrono::steady_clock::now();
-
+        
         // Wait for new data from container (blocking)
         if(!container_.getContent(true, content))
         {
             std::cerr << "Error: Failed to get content from container!" << std::endl;
             continue;
         }
-
+        
         // Transmit data using CServer
         if(!server_.transmitMessage(content))
         {
@@ -178,19 +174,18 @@ void CCommComp::run()
             }
             std::cout << "Client reconnected!" << std::endl;
         }
-
-        // Measure end time and calculate elapsed time
+        
+        // Calculate elapsed time and required sleep time
         auto endTime = std::chrono::steady_clock::now();
         auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-
-        // Calculate required sleep time
         auto sleepTime = (cycleTime / 2) - elapsedTime;
         
         // Only sleep if there's time left in the cycle
         if(sleepTime.count() > 0)
         {
-            // Convert milliseconds to microseconds for usleep
-            usleep(sleepTime.count() * 1000);
+            // More explicit and safer conversion:
+            auto sleepMicros = std::chrono::duration_cast<std::chrono::microseconds>(sleepTime);
+            usleep(sleepMicros.count());
         }
     }
 }
