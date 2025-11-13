@@ -3,6 +3,7 @@
 #include "CContainer.h"
 #include "AComponentBase.h"
 #include "CBBBHardware.h"
+#include "CServer.h"
 #include "CThread.h"
 
 int main_ex3();
@@ -27,4 +28,22 @@ private:
 
     CContainer& container_;
     CBBBHardware hardware_;
+};
+
+// -------------------------
+// -------------------------
+// Class CCommComp
+// -------------------------
+// -------------------------
+class CCommComp : public AComponentBase
+{
+public:
+    CCommComp(CContainer& container);
+
+    void init() override;
+    void run() override;
+
+private:
+    CContainer& container_;
+    CServer server_;
 };
