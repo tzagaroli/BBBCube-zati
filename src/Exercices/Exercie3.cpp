@@ -138,12 +138,15 @@ CCommComp::CCommComp(CContainer& container)
 void CCommComp::init()
 {
     std::cout << "Waiting for client connection..." << std::endl;
-    if(!server_.waitForClient())
+    
+    if(server_.waitForClient())
+    {
+        std::cout << "Client connected!" << std::endl;
+    }
+    else
     {
         std::cerr << "Failed to connect to client!" << std::endl;
-        return;
     }
-    std::cout << "Client connected!" << std::endl;
 }
 
 void CCommComp::run()
@@ -188,11 +191,6 @@ void CCommComp::run()
         {
             // Convert milliseconds to microseconds for usleep
             usleep(sleepTime.count() * 1000);
-        }
-        else
-        {
-            std::cerr << "Warning: Cycle time exceeded by " 
-                      << -sleepTime.count() << "ms" << std::endl;
         }
     }
 }
