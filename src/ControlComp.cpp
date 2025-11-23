@@ -21,6 +21,11 @@ void ControlComp::run()
     CIMUData sensor1Data;
     CIMUData sensor2Data;
 
+    
+    SContent content;
+    sCalibData calib;
+    SStateVectorData data;
+
     auto startTime = std::chrono::steady_clock::now();
     uint32_t n = 0;
     
@@ -36,7 +41,15 @@ void ControlComp::run()
         container_.writeADCValue(adcValue);
         container_.writeSensor1Data(sensor1Data);
         container_.writeSensor2Data(sensor2Data);
+
+        // container_.getContent(true, content);
+        // calib = calibration_.calibrate(content);
+        // data = estimation_.estimate(calib);
+        // data = filter_.filter(data);
+        // container_.writeStateData(data);
+
         container_.signalReader();
+        
 
         // --- IMU Sensor 1 Data ---
         std::cout << "IMU Sensor 1:" << std::endl;
