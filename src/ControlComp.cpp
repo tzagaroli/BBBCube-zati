@@ -42,11 +42,11 @@ void ControlComp::run()
         container_.writeSensor1Data(sensor1Data);
         container_.writeSensor2Data(sensor2Data);
 
-        // container_.getContent(true, content);
-        // calib = calibration_.calibrate(content);
-        // data = estimation_.estimate(calib);
-        // data = filter_.filter(data);
-        // container_.writeStateData(data);
+        container_.getContent(true, content);
+        calib = calibration_.calibrate(content);
+        data = estimation_.estimate(calib);
+        data = filter_.filter(data);
+        container_.writeStateData(data);
 
         container_.signalReader();
         

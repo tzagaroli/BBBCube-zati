@@ -6,6 +6,10 @@
 
 #include "BBBCube_Globals.hpp"
 
+#include "CCalibration.hpp"
+#include "CStateEstimation.hpp"
+#include "CFilter.hpp"
+
 class ControlComp : public AComponentBase
 {
 public:
@@ -21,4 +25,8 @@ private:
 
     CContainer& container_;
     CBBBHardware hardware_;
+
+    CCalibration calibration_;
+    CStateEstimation estimation_;
+    CFilter filter_;
 };
