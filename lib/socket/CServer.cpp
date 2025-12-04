@@ -116,6 +116,9 @@ CServer::CServer() : mSocketFD(-1),
 }
 CServer::~CServer()
 {
+	// Remove this line
+	std::cout << "CServer destructor" << std::endl;
+
 	Int32 retVal = shutdown(mConnectedSocketFD, SHUT_RDWR);
 	sAssertion(retVal >= 0, "(CServer::~CServer()): Failed to shutdown socket.", true);
 

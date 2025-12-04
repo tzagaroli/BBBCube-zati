@@ -5,6 +5,8 @@
 #include <chrono>
 #include <unistd.h>
 
+#include "SignalHandler.hpp"
+
 ControlComp::ControlComp(CContainer& container)
     : container_(container)
     , hardware_()
@@ -29,7 +31,7 @@ void ControlComp::run()
     auto startTime = std::chrono::steady_clock::now();
     uint32_t n = 0;
     
-    while(true)
+    while(!g_stop.load())
     {
         if(!hardware_.fetchValues(adcValue, sensor1Data, sensor2Data))
         {
@@ -37,12 +39,15 @@ void ControlComp::run()
             return;
         }
 
+        content.mADCValue = adcValue;
+        content.mSensor1Data = sensor1Data;
+        content.mSensor2Data = sensor2Data;
+
         container_.writeTime(n * cycleTime.count());
         container_.writeADCValue(adcValue);
         container_.writeSensor1Data(sensor1Data);
         container_.writeSensor2Data(sensor2Data);
 
-        container_.getContent(true, content);
         calib = calibration_.calibrate(content);
         data = estimation_.estimate(calib);
         data = filter_.filter(data);
@@ -50,15 +55,20 @@ void ControlComp::run()
 
         container_.signalReader();
         
+        if(verbose)
+        {
+            // --- ADC ---
+            vPrintValue("ADC Value", adcValue);
 
-        // --- IMU Sensor 1 Data ---
-        std::cout << "IMU Sensor 1:" << std::endl;
-        ControlComp::vPrintDataIMU(sensor1Data);
+            // --- IMU Sensor 1 Data ---
+            std::cout << "IMU Sensor 1:" << std::endl;
+            ControlComp::vPrintDataIMU(sensor1Data);
 
-        // --- IMU Sensor 2 Data ---
-        std::cout << "IMU Sensor 2:" << std::endl;
-        ControlComp::vPrintDataIMU(sensor2Data);
-        std::cout << std::endl;
+            // --- IMU Sensor 2 Data ---
+            std::cout << "IMU Sensor 2:" << std::endl;
+            ControlComp::vPrintDataIMU(sensor2Data);
+            std::cout << std::endl;
+        }
 
         // Increment counter BEFORE sleep calculation
         n++;
@@ -84,6 +94,8 @@ void ControlComp::run()
                       << "ms" << std::endl;
         }
     }
+
+    std::cout << "SIGINT received ControlComp" << std::endl;
 }
 
 void ControlComp::vPrintDataIMU(CIMUData& data)

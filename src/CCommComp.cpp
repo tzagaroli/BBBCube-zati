@@ -4,6 +4,8 @@
 #include <chrono>
 #include <unistd.h>
 
+#include "SignalHandler.hpp"
+
 CCommComp::CCommComp(CContainer& container)
     : container_(container)
     , server_()
@@ -29,14 +31,14 @@ void CCommComp::run()
 {
     SContent content;
 
-    while(true)
+    while(!g_stop.load())
     {
         auto startTime = std::chrono::steady_clock::now();
         
         // Wait for new data from container (blocking)
-        if(!container_.getContent(true, content))
+        if(!container_.getContent(false, content))
         {
-            std::cerr << "Error: Failed to get content from container!" << std::endl;
+            // std::cerr << "Error: Failed to get content from container!" << std::endl;
             continue;
         }
         
@@ -67,4 +69,6 @@ void CCommComp::run()
             usleep(sleepMicros.count());
         }
     }
+
+    std::cout << "SIGINT received CCommComp" << std::endl;
 }

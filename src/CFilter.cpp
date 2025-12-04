@@ -18,7 +18,7 @@ SStateVectorData CFilter::filter(const SStateVectorData& sData)
     }
     else
     {
-        fLastValue_ = fAlpha_ * (fLastValue_ + fT_ * sData.mPhi_d) + (1 - fAlpha_) * sData.mPhi_A;
+        fLastValue_ = fAlpha_ * (fLastValue_ - fT_ * sData.mPhi_d) + (1 - fAlpha_) * sData.mPhi_A;
     }
 
     sDataRet.mPhi_C = fLastValue_;
