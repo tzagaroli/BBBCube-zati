@@ -14,7 +14,7 @@ SStateVectorData CStateEstimation::estimate(const sCalibData& sData) const
 
     sRetData.mPhi_d = (sData.sIMU1.fAngularSpeedZ + sData.sIMU2.fAngularSpeedZ) / 2.0f;
 
-    sRetData.mPhi_A = atan2((sData.sIMU1.fAccelerationX - fR1_R2_ * sData.sIMU2.fAccelerationX), (sData.sIMU1.fAccelerationY - fR1_R2_ * sData.sIMU2.fAccelerationY));
+    sRetData.mPhi_A = atan2((sData.sIMU1.fAccelerationX - fR1_R2_ * sData.sIMU2.fAccelerationX), (sData.sIMU1.fAccelerationY - fR1_R2_ * sData.sIMU2.fAccelerationY)) + 0.0283074436299669f;
 
     return sRetData;
 }
