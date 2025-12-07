@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <chrono>
 #include <unistd.h>
+#include <cmath>
 
 #include "SignalHandler.hpp"
 
@@ -33,12 +34,10 @@ void ControlComp::run()
     auto startTime = std::chrono::steady_clock::now();
     uint32_t n = 0;
 
-    // if(hardware_.enableMotor())
-    //     std::cout << "Motor Enabled" << std::endl;
-    // if(hardware_.openBrake())
-    //     std::cout << "Brake Opened" << std::endl;
-    // if (hardware_.setTorque(0.01f))
-    //     std::cout << "Torque Set" << std::endl;
+    if(hardware_.enableMotor())
+        std::cout << "Motor Enabled" << std::endl;
+    if(hardware_.openBrake())
+        std::cout << "Brake Opened" << std::endl;
     
     while(!g_stop.load())
     {
@@ -52,7 +51,7 @@ void ControlComp::run()
         content.mSensor1Data = sensor1Data;
         content.mSensor2Data = sensor2Data;
 
-        container_.writeTime(n * cycleTime.count());
+        container_.writeTime(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
         container_.writeADCValue(adcValue);
         container_.writeSensor1Data(sensor1Data);
         container_.writeSensor2Data(sensor2Data);
@@ -60,7 +59,17 @@ void ControlComp::run()
         calib = calibration_.calibrate(content);
         data = estimation_.estimate(calib);
         data = filter_.filter(data);
+        
         fTorque = feedback_.calculate(data);
+
+        if(abs(data.mPhi_A) <= regulationLimit)
+        {
+            hardware_.setTorque(fTorque);
+        }
+        else
+        {
+            hardware_.setTorque(0.0f);
+        }
 
         container_.writeTorqueValue(fTorque);
         container_.writeStateData(data);
@@ -105,12 +114,11 @@ void ControlComp::run()
                       << std::chrono::duration_cast<std::chrono::milliseconds>(-sleepTime).count() 
                       << "ms" << std::endl;
         }
-        //hardware_.setTorque(0.0f);
     }
 
-    // hardware_.setTorque(0.0f);
-    // hardware_.disableMotor();
-    // hardware_.closeBrake();
+    hardware_.setTorque(0.0f);
+    hardware_.disableMotor();
+    hardware_.closeBrake();
 }
 
 void ControlComp::vPrintDataIMU(CIMUData& data)
