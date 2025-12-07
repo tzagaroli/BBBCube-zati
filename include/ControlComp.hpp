@@ -9,6 +9,7 @@
 #include "CCalibration.hpp"
 #include "CStateEstimation.hpp"
 #include "CFilter.hpp"
+#include "CFeedBack.hpp"
 
 class ControlComp : public AComponentBase
 {
@@ -29,4 +30,5 @@ private:
     CCalibration calibration_;
     CStateEstimation estimation_;
     CFilter filter_;
+    CFeedBack feedback_;
 };
