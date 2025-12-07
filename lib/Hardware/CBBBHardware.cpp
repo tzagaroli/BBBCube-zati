@@ -47,7 +47,7 @@ bool CBBBHardware::disableMotor()
 }
 bool CBBBHardware::setTorque(float torque)
 {
-	mMotor.setTorque(torque);
+	mMotor.setTorque(-torque);
 	return true;
 }
 bool CBBBHardware::openBrake()
