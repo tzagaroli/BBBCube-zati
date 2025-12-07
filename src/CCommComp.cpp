@@ -16,15 +16,19 @@ CCommComp::CCommComp(CContainer& container)
 void CCommComp::init()
 {
     std::cout << "Waiting for client connection..." << std::endl;
-    
-    if(server_.waitForClient())
+
+    // Keep trying to connect until a client connects or we receive stop signal
+    while(!g_stop.load())
     {
-        std::cout << "Client connected!" << std::endl;
+        if(server_.waitForClient())
+        {
+            std::cout << "Client connected!" << std::endl;
+            return;
+        }
+        // waitForClient timed out or was interrupted, check g_stop and retry
     }
-    else
-    {
-        std::cerr << "Failed to connect to client!" << std::endl;
-    }
+
+    std::cout << "Connection wait interrupted by shutdown signal" << std::endl;
 }
 
 void CCommComp::run()
@@ -35,10 +39,11 @@ void CCommComp::run()
     {
         auto startTime = std::chrono::steady_clock::now();
         
-        // Wait for new data from container (blocking)
+        // Wait for new data from container (non-blocking)
         if(!container_.getContent(false, content))
         {
-            // std::cerr << "Error: Failed to get content from container!" << std::endl;
+            // No data available, sleep briefly to avoid busy-wait
+            usleep(1000); // 1ms sleep
             continue;
         }
         
@@ -48,12 +53,24 @@ void CCommComp::run()
             std::cerr << "Error: Failed to transmit data!" << std::endl;
             // Client disconnected, wait for new connection
             std::cout << "Waiting for new client connection..." << std::endl;
-            if(!server_.waitForClient())
+
+            // Keep trying to reconnect until successful or shutdown requested
+            bool reconnected = false;
+            while(!g_stop.load() && !reconnected)
             {
-                std::cerr << "Failed to reconnect to client!" << std::endl;
+                if(server_.waitForClient())
+                {
+                    std::cout << "Client reconnected!" << std::endl;
+                    reconnected = true;
+                }
+                // waitForClient timed out or was interrupted, check g_stop and retry
+            }
+
+            if(!reconnected)
+            {
+                std::cout << "Reconnection aborted due to shutdown signal" << std::endl;
                 return;
             }
-            std::cout << "Client reconnected!" << std::endl;
         }
         
         // Calculate elapsed time and required sleep time
@@ -69,6 +86,4 @@ void CCommComp::run()
             usleep(sleepMicros.count());
         }
     }
-
-    std::cout << "SIGINT received CCommComp" << std::endl;
 }
