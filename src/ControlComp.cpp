@@ -94,8 +94,6 @@ void ControlComp::run()
                       << "ms" << std::endl;
         }
     }
-
-    std::cout << "SIGINT received ControlComp" << std::endl;
 }
 
 void ControlComp::vPrintDataIMU(CIMUData& data)

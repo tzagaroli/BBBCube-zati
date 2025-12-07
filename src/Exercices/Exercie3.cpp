@@ -26,7 +26,5 @@ int main_ex3()
     controlCompThread.join();
     commCompThread.join();
 
-    std::cout << "I was there" << std::endl;
-
     return 0;
 }
