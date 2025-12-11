@@ -7,6 +7,9 @@
 
 #include <iostream>
 
+#include <thread>
+#include <chrono>
+
 int main_ex3()
 {
     std::signal(SIGINT, sigintHandler);
@@ -20,8 +23,12 @@ int main_ex3()
 
     CThread commCompThread(&commComp, CThread::PRIORITY_LOW);
 
-    controlCompThread.start();
     commCompThread.start();
+
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+
+    controlCompThread.start();
+    
 
     controlCompThread.join();
     commCompThread.join();

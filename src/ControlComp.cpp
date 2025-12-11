@@ -65,6 +65,7 @@ void ControlComp::run()
         if(abs(data.mPhi_A) <= regulationLimit)
         {
             hardware_.setTorque(fTorque);
+            //hardware_.setTorque(0.0f);
         }
         else
         {
