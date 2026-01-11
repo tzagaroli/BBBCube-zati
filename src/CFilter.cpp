@@ -10,6 +10,7 @@ SStateVectorData CFilter::filter(const SStateVectorData& sData)
 {
     SStateVectorData sDataRet = sData;
 
+    // First execution: initialize filter state from measurement
     if (bFirstExecution_ == true)
     {
         bFirstExecution_ = false;

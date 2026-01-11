@@ -4,6 +4,8 @@
 #include <chrono>
 #include <unistd.h>
 
+#include <thread>
+
 #include "SignalHandler.hpp"
 
 CCommComp::CCommComp(CContainer& container)
@@ -17,6 +19,7 @@ void CCommComp::init()
 {
     std::cout << "Waiting for client connection..." << std::endl;
 
+    // Block until a client connects or shutdown is requested
     while(!g_stop.load())
     {
         if(server_.waitForClient())
@@ -29,18 +32,24 @@ void CCommComp::init()
 
 void CCommComp::run()
 {
+    // Buffer holding the message to transmit
     SContent content;
 
+    // Periodic communication loop
     while(!g_stop.load())
     {
+        // Timestamp at start of the cycle (used to maintain a fixed period)
         auto startTime = std::chrono::steady_clock::now();
         
+        // Retrieve latest content from the container; avoid busy-waiting if unavailable
         if(!container_.getContent(false, content))
         {
-            usleep(1000); // 1ms sleep
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
             continue;
         }
         
+        // Send the content to the connected client
         if(!server_.transmitMessage(content))
         {
             std::cerr << "Error: Failed to transmit data!" << std::endl;
@@ -58,7 +67,7 @@ void CCommComp::run()
             }
         }
         
-        // Calculate elapsed time and required sleep time
+        // Compute elapsed time and sleep for the remaining cycle budget
         auto endTime = std::chrono::steady_clock::now();
         auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
         auto sleepTime = (Ts / 2) - elapsedTime;
@@ -68,7 +77,7 @@ void CCommComp::run()
         {
             // More explicit and safer conversion:
             auto sleepMicros = std::chrono::duration_cast<std::chrono::microseconds>(sleepTime);
-            usleep(sleepMicros.count());
+            std::this_thread::sleep_for(sleepMicros);
         }
     }
 }

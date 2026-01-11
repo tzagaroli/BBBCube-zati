@@ -11,6 +11,7 @@
 #include "CFilter.hpp"
 #include "CFeedBack.hpp"
 
+// Main control component coordinating sensing, estimation, and control
 class ControlComp : public AComponentBase
 {
 public:

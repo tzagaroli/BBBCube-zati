@@ -15,6 +15,7 @@
 
 int main()
 {
+	// Register handler for Ctrl+C to allow graceful shutdown
 	std::signal(SIGINT, sigintHandler);
 
     CContainer container;
@@ -22,17 +23,19 @@ int main()
     ControlComp control(container);
     CCommComp commComp(container);
 
-    CThread controlCompThread(&control, CThread::PRIORITY_ABOVE_NORM);
+	// Create threads with different priorities
+    CThread controlCompThread(&control, CThread::PRIORITY_REALTIME);
+    CThread commCompThread(&commComp, CThread::PRIORITY_NORM);
 
-    CThread commCompThread(&commComp, CThread::PRIORITY_LOW);
-
+	// Start communication thread first (waits for client connection)
     commCompThread.start();
-
+	// Delay to allow the communication server to initialize
     std::this_thread::sleep_for(std::chrono::seconds(5));
 
+	// Start control loop thread
     controlCompThread.start();
     
-
+	// Wait for both threads to finish before exiting
     controlCompThread.join();
     commCompThread.join();
 

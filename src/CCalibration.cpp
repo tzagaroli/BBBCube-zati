@@ -4,10 +4,15 @@ CCalibration::CCalibration()
 {
 }
 
+// Applies calibration polynomials to raw sensor data
+// Converts ADC and IMU measurements into physical values
 sCalibData CCalibration::calibrate(SContent& content) const
 {
+    // Output structure for calibrated data
     sCalibData sDataRet;
     
+
+    // y = a * x + b
     sDataRet.fFlywheelOmega = csADC.a * static_cast<float>(content.mADCValue) + csADC.b;
 
     sDataRet.sIMU1.fAccelerationX = csAccel1X.a * static_cast<float>(content.mSensor1Data.mA_x) + csAccel1X.b;
@@ -19,5 +24,6 @@ sCalibData CCalibration::calibrate(SContent& content) const
     sDataRet.sIMU1.fAngularSpeedZ = -(csGyro1Z.a * static_cast<float>(content.mSensor1Data.mPhi_d) + csGyro1Z.b);
     sDataRet.sIMU2.fAngularSpeedZ = -(csGyro2Z.a * static_cast<float>(content.mSensor2Data.mPhi_d) + csGyro2Z.b);
 
+    
     return sDataRet;
 }

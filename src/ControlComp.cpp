@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <cmath>
 
+#include <thread>
+
 #include "SignalHandler.hpp"
 
 ControlComp::ControlComp(CContainer& container)
@@ -31,16 +33,18 @@ void ControlComp::run()
 
     float fTorque = 0;
 
+    // Timing reference for periodic loop (fixed-rate scheduling)
     auto startTime = std::chrono::steady_clock::now();
     uint32_t n = 0;
 
-    if(hardware_.enableMotor())
-        std::cout << "Motor Enabled" << std::endl;
-    if(hardware_.openBrake())
-        std::cout << "Brake Opened" << std::endl;
+    // Enable actuators before entering control loop
+    hardware_.enableMotor();
+    hardware_.openBrake();
     
+    // Main control loop
     while(!g_stop.load())
     {
+        // Read hardware measurements (ADC + two IMUs)
         if(!hardware_.fetchValues(adcValue, sensor1Data, sensor2Data))
         {
             std::cerr << "Error: fetchValues() failed!" << std::endl;
@@ -51,18 +55,21 @@ void ControlComp::run()
         content.mSensor1Data = sensor1Data;
         content.mSensor2Data = sensor2Data;
 
-        container_.writeTime(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
+        // Publish raw measurements to the shared container (for logging/telemetry)
+        container_.writeTime(
+            std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()
+        );
         container_.writeADCValue(adcValue);
         container_.writeSensor1Data(sensor1Data);
         container_.writeSensor2Data(sensor2Data);
 
+        // Processing chain: calibration -> state estimation -> filtering -> feedback control
         calib = calibration_.calibrate(content);
         data = estimation_.estimate(calib);
         data = filter_.filter(data);
-        
         fTorque = feedback_.calculate(data);
 
-        // Regulation only on between +-10° (=0.174533 rad)
+        // Apply regulation only within +/- 10 degrees (0.174533 rad)
         if(abs(data.mPhi_A) <= 0.174533f)
         {
             hardware_.setTorque(fTorque);
@@ -72,9 +79,11 @@ void ControlComp::run()
             hardware_.setTorque(0.0f);
         }
 
+        // Publish computed control and state to the container
         container_.writeTorqueValue(fTorque);
         container_.writeStateData(data);
 
+        // Notify consumers that a new sample is available
         container_.signalReader();
         
         // // --- ADC ---
@@ -89,22 +98,18 @@ void ControlComp::run()
         // ControlComp::vPrintDataIMU(sensor2Data);
         // std::cout << std::endl;
 
-        // Increment counter BEFORE sleep calculation
+
+        // Fixed-rate scheduling: compute next wake-up time based on initial start time
         n++;
         auto currentTime = std::chrono::steady_clock::now();
-
-        // Calculate when the next cycle should start
         auto nextWakeTime = startTime + (Ts * n);
-        
-        // Calculate required sleep time
         auto sleepTime = nextWakeTime - currentTime;
         
         // Only sleep if there's time left in the cycle
         if(sleepTime.count() > 0)
         {
-            // Convert to microseconds for usleep
             auto sleepMicros = std::chrono::duration_cast<std::chrono::microseconds>(sleepTime);
-            usleep(sleepMicros.count());
+            std::this_thread::sleep_for(sleepMicros);
         }
         else
         {

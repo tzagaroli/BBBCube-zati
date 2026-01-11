@@ -6,6 +6,7 @@
 
 #include "BBBCube_Globals.hpp"
 
+// Communication component responsible for server-based data exchange
 class CCommComp : public AComponentBase
 {
 public:

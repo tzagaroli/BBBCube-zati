@@ -5,6 +5,7 @@
 
 #include "SStateVectorData.h"
 
+// Computes the system state from calibrated sensor measurements
 class CStateEstimation
 {
 public:
