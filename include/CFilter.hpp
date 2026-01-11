@@ -14,7 +14,7 @@ public:
     SStateVectorData filter(const SStateVectorData& sData);
 
 private:
-    const float fT_ = std::chrono::duration<float>(cycleTime).count();
+    const float fT_ = std::chrono::duration<float>(Ts).count();
     const float fAlpha_ = 0.98;
 
     bool bFirstExecution_;

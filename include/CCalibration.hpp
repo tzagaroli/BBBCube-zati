@@ -10,13 +10,12 @@ struct sPolynom
 };
 
 
-
 class CCalibration
 {
 public:
     CCalibration();
 
-    sCalibData calibrate(SContent& content);
+    sCalibData calibrate(SContent& content) const;
 
 private:
     sCalibData sData_;

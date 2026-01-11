@@ -8,5 +8,7 @@ float CFeedBack::calculate(SStateVectorData& data) const
     fRet += data.mPhi_d * K_[K_phi_d];
     fRet += data.mPsi_d * K_[K_psi_d];
 
-    return -fRet;
+    fRet *= -1;
+
+    return fRet;
 }

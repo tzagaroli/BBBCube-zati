@@ -1,19 +1,40 @@
 #include <iostream>
 
-#define EXERCICE_NB 3
+#include <thread>
+#include <chrono>
 
-#include "Exercices/Exercice1.hpp"
-#include "Exercices/Exercice3.hpp"
+#include "BBBCube_Globals.hpp"
+
+#include "CContainer.h"
+#include "CThread.h"
+#include "ControlComp.hpp"
+#include "CCommComp.hpp"
+
+#include "SignalHandler.hpp"
+
 
 int main()
 {
-#if EXERCICE_NB == 1
-	HelloMultithread();
-#elif EXERCICE_NB == 2
+	std::signal(SIGINT, sigintHandler);
 
-#elif EXERCICE_NB == 3
-	main_ex3();
-#else
-	std::cout << "Nothing to do" << std::endl;
-#endif
+    CContainer container;
+
+    ControlComp control(container);
+    CCommComp commComp(container);
+
+    CThread controlCompThread(&control, CThread::PRIORITY_ABOVE_NORM);
+
+    CThread commCompThread(&commComp, CThread::PRIORITY_LOW);
+
+    commCompThread.start();
+
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+
+    controlCompThread.start();
+    
+
+    controlCompThread.join();
+    commCompThread.join();
+
+    return 0;
 }

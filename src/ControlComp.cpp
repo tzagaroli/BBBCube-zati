@@ -62,10 +62,10 @@ void ControlComp::run()
         
         fTorque = feedback_.calculate(data);
 
-        if(abs(data.mPhi_A) <= regulationLimit)
+        // Regulation only on between +-10° (=0.174533 rad)
+        if(abs(data.mPhi_A) <= 0.174533f)
         {
             hardware_.setTorque(fTorque);
-            //hardware_.setTorque(0.0f);
         }
         else
         {
@@ -77,27 +77,24 @@ void ControlComp::run()
 
         container_.signalReader();
         
-        if(verbose)
-        {
-            // --- ADC ---
-            vPrintValue("ADC Value", adcValue);
+        // // --- ADC ---
+        // vPrintValue("ADC Value", adcValue);
 
-            // --- IMU Sensor 1 Data ---
-            std::cout << "IMU Sensor 1:" << std::endl;
-            ControlComp::vPrintDataIMU(sensor1Data);
+        // // --- IMU Sensor 1 Data ---
+        // std::cout << "IMU Sensor 1:" << std::endl;
+        // ControlComp::vPrintDataIMU(sensor1Data);
 
-            // --- IMU Sensor 2 Data ---
-            std::cout << "IMU Sensor 2:" << std::endl;
-            ControlComp::vPrintDataIMU(sensor2Data);
-            std::cout << std::endl;
-        }
+        // // --- IMU Sensor 2 Data ---
+        // std::cout << "IMU Sensor 2:" << std::endl;
+        // ControlComp::vPrintDataIMU(sensor2Data);
+        // std::cout << std::endl;
 
         // Increment counter BEFORE sleep calculation
         n++;
         auto currentTime = std::chrono::steady_clock::now();
 
         // Calculate when the next cycle should start
-        auto nextWakeTime = startTime + (cycleTime * n);
+        auto nextWakeTime = startTime + (Ts * n);
         
         // Calculate required sleep time
         auto sleepTime = nextWakeTime - currentTime;
